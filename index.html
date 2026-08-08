@@ -320,17 +320,19 @@ function decide(inp){
 
   // Step 0: safety-net symptoms
   if(present.length){
-    var nonTC=present.filter(function(p){return p!=="thunderclap";});
-    if(present.indexOf("thunderclap")>=0 && inp.lp_done!==true){
-      trace.push("A thunderclap / worst-ever headache was reported and no lumbar puncture was done at the first visit, so subarachnoid bleeding has not been excluded.");
-      return {tier:"RETURN_ED",trace:trace.concat(["Because bleeding cannot be ruled out at the bedside, the patient returns to the ED for a lumbar puncture and re-evaluation."]),flags:flags};
-    }
-    if(nonTC.length){
-      trace.push("The patient has an active red-flag symptom: "+nonTC.map(function(p){return SXTEXT[p];}).join(", ")+".");
+    // Headaches concerning for SAH are LP-gated; other red-flag symptoms are unconditional.
+    var haSAH=present.filter(function(p){return p==="thunderclap"||p==="worsening_headache";});
+    var other=present.filter(function(p){return p!=="thunderclap"&&p!=="worsening_headache";});
+    if(other.length){
+      trace.push("The patient has an active red-flag symptom: "+other.map(function(p){return SXTEXT[p];}).join(", ")+".");
       return {tier:"RETURN_ED",trace:trace.concat(["A red-flag symptom takes priority over the aneurysm characteristics — the patient returns to the ED now."]),flags:flags};
     }
-    if(present.indexOf("thunderclap")>=0 && inp.lp_done===true){
-      trace.push("A thunderclap headache was reported, but a lumbar puncture was already performed at the first visit — so this alone is not an automatic return. The tool continues to assess the lesion.");
+    if(haSAH.length && inp.lp_done!==true){
+      trace.push("A "+haSAH.map(function(p){return SXTEXT[p];}).join(" and ")+" was reported and no lumbar puncture was done at the first visit, so subarachnoid bleeding has not been excluded.");
+      return {tier:"RETURN_ED",trace:trace.concat(["Because bleeding cannot be ruled out at the bedside, the patient returns to the ED for a lumbar puncture and re-evaluation."]),flags:flags};
+    }
+    if(haSAH.length && inp.lp_done===true){
+      trace.push("A "+haSAH.map(function(p){return SXTEXT[p];}).join(" and ")+" was reported, but a lumbar puncture was already performed at the first visit — so this alone is not an automatic return. The tool continues to assess the lesion.");
     }
   }
 
@@ -433,9 +435,9 @@ function setSize(v){q('#size').value=v;syncUI();}
 function sectionsDone(){
   var loc=q('input[name=location]:checked');
   var d={};
-  // sec1: answered if no thunderclap OR (thunderclap + lp answered); always "engaged" once anything below is touched
-  var tc=q('input[name=sx][value=thunderclap]');
-  d.sec1 = !(tc&&tc.checked) || !!q('input[name=lp]:checked');
+  // sec1: answered if no SAH-concerning headache OR (headache + lp answered)
+  var tc=q('input[name=sx][value=thunderclap]:checked')||q('input[name=sx][value=worsening_headache]:checked');
+  d.sec1 = !tc || !!q('input[name=lp]:checked');
   d.sec2 = !!loc && (loc.value!=='cavernous' || !!q('input[name=cavsx]:checked'));
   if(loc&&loc.value==='cavernous'){ d.sec3=true; }
   else{
@@ -450,8 +452,8 @@ function sectionsDone(){
 }
 function syncUI(){
   selPaint();
-  var tc=q('input[name=sx][value=thunderclap]');
-  q('#lpwrap').classList.toggle('hidden',!(tc&&tc.checked));
+  var tc=q('input[name=sx][value=thunderclap]:checked')||q('input[name=sx][value=worsening_headache]:checked');
+  q('#lpwrap').classList.toggle('hidden',!tc);
   var loc=q('input[name=location]:checked');
   q('#cavsx').classList.toggle('hidden',!(loc&&loc.value==='cavernous'));
   q('#lesionblock').classList.toggle('hidden',!!(loc&&loc.value==='cavernous'));
@@ -494,8 +496,8 @@ function validate(inp){
     if(inp._read==='classic_infundibulum' && !(q('input[name=allcrit]:checked')))e.push("Indicate whether all classic-infundibulum criteria are met (Step 3).");
   }
   if(inp._loc==='cavernous' && !(q('input[name=cavsx]:checked')))e.push("Indicate whether cavernous-sinus symptoms are present (Step 2).");
-  var tc=q('input[name=sx][value=thunderclap]');
-  if(tc&&tc.checked && !(q('input[name=lp]:checked')))e.push("Indicate whether an LP was done (Step 1 \u2014 thunderclap selected).");
+  var tc=q('input[name=sx][value=thunderclap]:checked')||q('input[name=sx][value=worsening_headache]:checked');
+  if(tc && !(q('input[name=lp]:checked')))e.push("Indicate whether an LP was done (Step 1 \u2014 headache concerning for bleeding selected).");
   if(isNaN(inp.age))e.push("Enter the patient age (Step 5).");
   return e;
 }
