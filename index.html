@@ -17,6 +17,7 @@
   --ok:#059669;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.hidden{display:none!important}
 html{font-size:17px}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   color:var(--ink);background:#eef1f6;line-height:1.5}
@@ -178,9 +179,9 @@ footer{max-width:1200px;margin:0 auto;padding:6px 22px 40px;color:#8595a9;font-s
         <div class="stext"><div class="title">Where is the finding?</div>
           <div class="why">Cavernous-segment lesions sit outside the dura (essentially no bleed risk); posterior-circulation lesions are treated more urgently.</div></div></div>
       <div class="opts" data-group="location">
-        <label class="opt"><input type="radio" name="location" value="anterior"><span class="oc">Anterior circulation</span></label>
-        <label class="opt"><input type="radio" name="location" value="posterior"><span class="oc">Posterior circulation</span></label>
-        <label class="opt"><input type="radio" name="location" value="cavernous"><span class="oc">Cavernous ICA</span></label>
+        <label class="opt"><input type="radio" name="location" value="anterior"><span class="oc">Anterior circulation<small>ICA (supraclinoid), ACA, MCA, AComA, PComA, ophthalmic</small></span></label>
+        <label class="opt"><input type="radio" name="location" value="posterior"><span class="oc">Posterior circulation<small>Vertebral, basilar (incl. tip), PCA, PICA, AICA, SCA</small></span></label>
+        <label class="opt"><input type="radio" name="location" value="cavernous"><span class="oc">Cavernous ICA<small>Cavernous (intracavernous) segment of the internal carotid</small></span></label>
       </div>
       <div id="cavsx" class="hidden">
         <label class="q">Any cavernous-sinus symptoms? <span class="why0">(3rd / 4th / 6th nerve palsy, retro-orbital pain)</span></label>
